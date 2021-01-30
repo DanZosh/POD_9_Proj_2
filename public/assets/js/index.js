@@ -1,26 +1,52 @@
 // DOM ELEMENTS:
 const userSubmitEl = $("#user-submit");
-console.log(userSubmitEl);
-console.log("test");
+const userListEl = $(".userInfo");
 
-$("#user-submit").on("click", event => {
-  console.log($("#user-submit"));
+userSubmitEl.on("click", event => {
   event.preventDefault();
-  //front end team to match id for submit button
-  // Make a newChirp object
+  function capCharZero(string) {
+    return string
+      .toLowerCase()
+      .split(" ")
+      .map(s => s.charAt(0).toUpperCase() + s.substring(1))
+      .join(" ");
+  }
   const newUser = {
-    firstName: $("#first_name")
-      .val()
-      .trim(),
-    lastName: $("#last_name")
-      .val()
-      .trim()
-    //   created_at: new Date()
+    firstName: capCharZero(
+      $("#first_name")
+        .val()
+        .trim()
+    ),
+    lastName: capCharZero(
+      $("#last_name")
+        .val()
+        .trim()
+    )
   };
+  if (newUser.firstName.length === 0) {
+    swal({
+      icon: "error",
+      title: "Please Enter First Name"
+    });
+    return;
+  } else if (newUser.lastName.length === 0) {
+    swal({
+      icon: "error",
+      title: "Please Enter Last Name"
+    });
+    return;
+  }
 
-  console.log(newUser);
-
-  $.post("/api/newUser", newUser).then(() => {
-    location.reload();
+  $.post("/api/newUser", newUser).then(data => {
+    $.get("/api/user/" + data.id).then(userInfo => {
+      window.location.replace("/shift?userId=" + userInfo.id);
+    });
   });
+});
+
+//Functionality to redirect to shift page when selecting a user
+userListEl.on("click", function(event) {
+  event.preventDefault();
+  const userId = $(this).data("id");
+  window.location.replace("/shift?userId=" + userId);
 });
